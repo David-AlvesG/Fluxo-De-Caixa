@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Fluxo de Caixa</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Fluxo de Caixa</h1>
+
+        <!-- Formulário de Lançamento -->
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="tipo">Tipo</label>
+                <select name="tipo" class="form-control" required>
+                    <option value="credito">Crédito</option>
+                    <option value="debito">Débito</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="valor">Valor</label>
+                <input type="number" name="valor" step="0.01" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="descricao">Descrição</label>
+                <input type="text" name="descricao" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="data">Data</label>
+                <input type="date" name="data" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Registrar Lançamento</button>
+        </form>
+
+        <!-- Exibição de Lançamentos -->
+        <h2>Histórico de Lançamentos</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Descrição</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lancamento in lancamentos %}
+                <tr>
+                    <td>{{ lancamento.data }}</td>
+                    <td>{{ lancamento.get_tipo_display }}</td>
+                    <td>{{ lancamento.descricao }}</td>
+                    <td>{{ lancamento.valor }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Exibição de Saldo -->
+        <h2>Saldo Atual: {{ saldo }}</h2>
+        <h2>Resultado: {{ resultado }}</h2>
+
+        <!-- Gráfico -->
+        <canvas id="fluxoChart"></canvas>
+    </div>
+
+    <script>
+        // Configuração do Gráfico
+        var ctx = document.getElementById('fluxoChart').getContext('2d');
+        var fluxoChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ labels|safe }},
+                datasets: [{
+                    label: 'Saldo',
+                    data: {{ data|safe }},
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
